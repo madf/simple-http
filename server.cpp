@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstring>
 
 void reference()
 {
@@ -16,16 +15,17 @@ void reference()
 
 int main(int argc, char* argv[])
 {
-    std::string version = "1.0.0";
+    const std::string version = "1.0.0";
 
     for (int i = 1; i < argc; ++i)
     {
-        if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))
+        const std::string arg = argv[i];
+        if (arg == "-v" || arg == "--version")
         {
             std::cout << "Version " << version << "\n";
             return 0;
         }
-        else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))
+        else if (arg == "-h" || arg == "--help")
         {
             reference();
             return 0;
