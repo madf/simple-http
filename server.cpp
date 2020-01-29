@@ -59,5 +59,23 @@ int main(int argc, char* argv[])
             return 1;
         }
     }
+
+    std::string port;
+    std::string host;
+    if (!address.empty())
+    {
+        size_t pos = address.find(":");
+        if (pos != std::string::npos)
+        {
+            host = address.substr(0, pos);
+            port = address.substr(pos + 1, address.length() - pos - 1);
+        }
+        else
+        {
+            host = address;
+        }
+    }
+
+
     return 0;
 }
