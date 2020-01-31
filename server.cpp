@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::string port;
+    std::string port = "80";
     std::string host;
     if (!address.empty())
     {
@@ -76,6 +76,11 @@ int main(int argc, char* argv[])
         }
     }
 
+    boost::asio::io_service io_service;
+    tcp::resolver resolver(io_service);
+    tcp::resolver::query query(host, port);
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+    tcp::endpoint ep = *endpoint_iterator;
 
     return 0;
 }
