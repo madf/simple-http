@@ -20,9 +20,9 @@ void reference()
 
 std::string make_daytime_string()
 {
-  using namespace std; // For time_t, time and ctime;
-  time_t now = time(0);
-  return ctime(&now);
+    using namespace std; // For time_t, time and ctime;
+    time_t now = time(0);
+    return ctime(&now);
 }
 
 int main(int argc, char* argv[])
@@ -77,10 +77,24 @@ int main(int argc, char* argv[])
     }
 
     boost::asio::io_service io_service;
+
     tcp::resolver resolver(io_service);
     tcp::resolver::query query(host, port);
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
     tcp::endpoint ep = *endpoint_iterator;
 
+    tcp::acceptor acceptor(io_service, ep);
+
+    for (;;)
+    {
+        tcp::socket socket(io_service);
+        acceptor.accept(socket);
+
+        std::string message = make_daytime_string();
+
+        boost::system::error_code ignored_error;
+        boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+        std::cout << message << "\n";
+    }
     return 0;
 }
