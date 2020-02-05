@@ -76,31 +76,40 @@ int main(int argc, char* argv[])
         }
     }
 
-    boost::asio::io_service io_service;
-
-    tcp::resolver resolver(io_service);
-    tcp::resolver::query query(host, port);
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-    tcp::endpoint ep = *endpoint_iterator;
-
-    tcp::acceptor acceptor(io_service, ep);
-
-    for (;;)
+    try
     {
-        tcp::socket socket(io_service);
-        acceptor.accept(socket);
+        boost::asio::io_service io_service;
 
-        std::string message = make_daytime_string();
+        tcp::resolver resolver(io_service);
+        tcp::resolver::query query(host, port);
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+        tcp::endpoint ep = *endpoint_iterator;
 
-        boost::system::error_code ignored_error;
-        boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
-        std::cout << message << "\n";
+        tcp::acceptor acceptor(io_service, ep);
 
-        tcp::endpoint remote_ep = socket.remote_endpoint();
-        boost::asio::ip::address remote_ad = remote_ep.address();
-        std::string s = remote_ad.to_string();
+        for (;;)
+        {
+            tcp::socket socket(io_service);
+            acceptor.accept(socket);
 
-        std::cout << s << "\n";
+            std::string message = make_daytime_string();
+
+            boost::system::error_code ignored_error;
+            boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+            std::cout << message << "\n";
+
+            tcp::endpoint remote_ep = socket.remote_endpoint();
+            boost::asio::ip::address remote_ad = remote_ep.address();
+            std::string s = remote_ad.to_string();
+
+            std::cout << s << "\n";
+        }
     }
+
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << "\n";
+    }
+
     return 0;
 }
