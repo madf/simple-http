@@ -104,7 +104,6 @@ int main(int argc, char* argv[])
             std::cout << s << "\n";
         }
     }
-
     catch (std::exception& e)
     {
         std::cerr << e.what() << "\n";
