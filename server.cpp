@@ -26,7 +26,7 @@ std::string make_daytime_string()
 
 int main(int argc, char* argv[])
 {
-    const std::string version = "1.0.0";
+    const std::string version = "1.1.0";
     std::string address;
 
     for (int i = 1; i < argc; ++i)
