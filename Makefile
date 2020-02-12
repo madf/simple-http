@@ -1,5 +1,5 @@
 CXXFLAGS = -W -Wall -Wextra -std=c++11
-LDFLAGS = -l boost_system -l pthread
+LDFLAGS = -lboost_system -lpthread
 
 SOURCES = server.cpp
 
