@@ -20,8 +20,11 @@ void reference()
 
 std::string make_daytime_string()
 {
+    char buffer[80];
     time_t now = time(nullptr);
-    return ctime(&now);
+    struct tm* timeinfo = localtime(&now);
+    strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo);
+    return buffer;
 }
 
 int main(int argc, char* argv[])
@@ -95,13 +98,12 @@ int main(int argc, char* argv[])
 
             boost::system::error_code ignored_error;
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
-            std::cout << message << "\n";
 
             tcp::endpoint remote_ep = socket.remote_endpoint();
             boost::asio::ip::address remote_ad = remote_ep.address();
             std::string s = remote_ad.to_string();
 
-            std::cout << s << "\n";
+            std::cout << message << " " << s << "\n";
         }
     }
     catch (const std::exception& e)
