@@ -99,11 +99,7 @@ int main(int argc, char* argv[])
             boost::system::error_code ignored_error;
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
 
-            tcp::endpoint remote_ep = socket.remote_endpoint();
-            boost::asio::ip::address remote_ad = remote_ep.address();
-            std::string s = remote_ad.to_string();
-
-            std::cout << message << " " << s << "\n";
+            std::cout << message << " " << socket.remote_endpoint().address().to_string() << "\n";
         }
     }
     catch (const std::exception& e)
