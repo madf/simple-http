@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
         {
             if (i + 1 == argc)
             {
-                std::cerr << argv[i] << " needs and argument - an address.\n";
+                std::cerr << arg << " needs an argument - an address.\n";
                 return 1;
             }
             address = argv[++i];
