@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
             tcp::socket socket(io_service);
             acceptor.accept(socket);
 
-            std::string message = make_daytime_string();
+            const std::string message = make_daytime_string();
 
             boost::system::error_code ignored_error;
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
