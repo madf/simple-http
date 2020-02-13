@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     std::string host;
     if (!address.empty())
     {
-        size_t pos = address.find(":");
+        const size_t pos = address.find(":");
         if (pos != std::string::npos)
         {
             host = address.substr(0, pos);
