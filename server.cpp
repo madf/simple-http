@@ -84,10 +84,7 @@ int main(int argc, char* argv[])
 
         tcp::resolver resolver(io_service);
         tcp::resolver::query query(host, port);
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-        tcp::endpoint ep = *endpoint_iterator;
-
-        tcp::acceptor acceptor(io_service, ep);
+        tcp::acceptor acceptor(io_service, *resolver.resolve(query));
 
         for (;;)
         {
