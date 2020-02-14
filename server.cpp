@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
         boost::asio::io_service io_service;
 
         tcp::resolver resolver(io_service);
-        tcp::acceptor acceptor(io_service, *resolver.resolve(tcp::resolver::query(host,port)));
+        tcp::acceptor acceptor(io_service, *resolver.resolve(tcp::resolver::query(host, port)));
 
         for (;;)
         {
