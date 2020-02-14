@@ -1,4 +1,5 @@
 CXXFLAGS = -W -Wall -Wextra -std=c++11
+LDFLAGS = -lboost_system -lpthread
 
 SOURCES = server.cpp
 
@@ -7,7 +8,7 @@ SOURCES = server.cpp
 all: server
 
 server: server.o
-	$(CXX) $< -o $@
+	$(CXX) $< $(LDFLAGS) -o $@
 
 clean:
 	rm *.o *.d server
