@@ -11,8 +11,8 @@ void reference()
     std::cout << "server [-a/--address <bind-address][-h/--help][-v/--version]\n\n";
 /*    std::cout << "server [-a/--address <bind-address>][-d/--dir <work-dir>][-o/--out-log <log-file-name>][-h/--help][-v/--version]\n\n";
 
-    std::cout << "-d, --dir <work-dir> - specifies the working directory with files for the server;\n";
-    std::cout << "-o, --out-log <log-file-name> - specifies the file name for logging for the server;\n";*/
+    std::cout << "-d, --dir <work-dir> - specifies the working directory with files for the server;\n";*/
+    std::cout << "-o, --out-log <log-file-name> - specifies the file name for logging for the server;\n";
     std::cout << "-a, --address <bind-address> - can be specified in <address>[:<port>] form, where <address> can be IP-address or domain name, <port> - number;\n";
     std::cout << "-v, --version - server version;\n";
     std::cout << "-h, --help - show this text.\n";
@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 {
     const std::string version = "1.1.0";
     std::string address;
+    std::string outfile;
 
     for (int i = 1; i < argc; ++i)
     {
@@ -44,6 +45,15 @@ int main(int argc, char* argv[])
                 return 1;
             }
             address = argv[++i];
+        }
+        else if (arg == "-o" || arg == "--outfile")
+        {
+            if (i + 1 == argc)
+            {
+                std::cerr << arg << " needs an argument - a filename.\n";
+                return 1;
+            }
+            outfile = argv[++i];
         }
         else if (arg == "-v" || arg == "--version")
         {
