@@ -1,5 +1,6 @@
 #include <boost/asio.hpp>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <ctime>
 
@@ -105,7 +106,17 @@ int main(int argc, char* argv[])
             boost::system::error_code ignored_error;
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
 
-            std::cout << message << " " << socket.remote_endpoint().address().to_string() << "\n";
+            std::string log_message = message + " " + socket.remote_endpoint().address().to_string();
+            if (!outfile.empty())
+            {
+                std::ofstream fout(outfile);
+                fout << log_message;
+                fout.close();
+            }
+            else
+            {
+                std::cout << log_message << "\n";
+            }
         }
     }
     catch (const std::exception& e)
