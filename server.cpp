@@ -1,10 +1,13 @@
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <algorithm>
 #include <ctime>
 
 using boost::asio::ip::tcp;
+using boost::system::error_code;
 
 void reference()
 {
@@ -26,6 +29,14 @@ std::string make_daytime_string()
     struct tm* timeinfo = localtime(&now);
     strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo);
     return buffer;
+}
+
+size_t read_complete(char * buff, const error_code & err, size_t bytes)
+{
+    if ( err) return 0;
+    std::string str = "\r\n\r\n";
+    bool found = std::search(buff, buff + bytes, str.begin(), str.end()) != buff + bytes;
+    return found ? 0 : 1;
 }
 
 int main(int argc, char* argv[])
@@ -96,10 +107,15 @@ int main(int argc, char* argv[])
         tcp::resolver resolver(io_service);
         tcp::acceptor acceptor(io_service, *resolver.resolve(tcp::resolver::query(host, port)));
 
+        char buff[1024];
+
         for (;;)
         {
             tcp::socket socket(io_service);
             acceptor.accept(socket);
+
+            int bytes = read(socket, boost::asio::buffer(buff), boost::bind(read_complete,buff,_1,_2));
+            std::string msg(buff, bytes);
 
             const std::string message = make_daytime_string();
 
