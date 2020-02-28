@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <algorithm>
+#include <algorithm> // std::search
 #include <ctime>
 
 using boost::asio::ip::tcp;
@@ -109,24 +109,33 @@ int main(int argc, char* argv[])
 
         char buff[1024];
 
+        std::ofstream fout;
+        if (outfile.empty())
+            fout.close();
+
         for (;;)
         {
             tcp::socket socket(io_service);
             acceptor.accept(socket);
 
             int bytes = read(socket, boost::asio::buffer(buff), boost::bind(read_complete,buff,_1,_2));
+
             std::string msg(buff, bytes);
+            size_t str_end_pos = msg.find("\r");
+            std::string start_str = msg.substr(0, str_end_pos);
+            std::string method = start_str.substr(0, 3);
+            std::string http_version = start_str.substr(str_end_pos - 3);
 
             const std::string message = make_daytime_string();
 
             boost::system::error_code ignored_error;
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
 
-            std::string log_message = message + " " + socket.remote_endpoint().address().to_string();
-            if (!outfile.empty())
+            std::string log_message = message + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
+            if (fout)
             {
-                std::ofstream fout(outfile);
-                fout << log_message;
+                fout.open(outfile, std::ios::app);
+                fout << log_message << "\n";
                 fout.close();
             }
             else
