@@ -118,17 +118,26 @@ int main(int argc, char* argv[])
             tcp::socket socket(io_service);
             acceptor.accept(socket);
 
-            int bytes = read(socket, boost::asio::buffer(buff), boost::bind(read_complete,buff,_1,_2));
+            int bytes = read(socket, boost::asio::buffer(buff), boost::bind(read_complete, buff, _1, _2));
 
             std::string msg(buff, bytes);
+
             size_t str_end_pos = msg.find("\r");
             std::string start_str = msg.substr(0, str_end_pos);
-            std::string method = start_str.substr(0, 3);
             std::string http_version = start_str.substr(str_end_pos - 3);
+            std::string error_message;
+
+            if (start_str.substr(0, 3) != "GET")
+                error_message = "405 Method not allowed\n";
+            if (http_version != "1.1" && http_version != "1.0")
+                error_message += "505 HTTP Version Not Supported\n";
+
+            boost::system::error_code ignored_error;
+            if (!error_message.empty())
+                boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
 
             const std::string message = make_daytime_string();
 
-            boost::system::error_code ignored_error;
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
 
             std::string log_message = message + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
