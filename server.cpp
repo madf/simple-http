@@ -31,7 +31,7 @@ std::string make_daytime_string()
     return buffer;
 }
 
-size_t read_complete(char * buff, const error_code & err, size_t bytes)
+size_t read_complete(char* buff, const error_code& err, size_t bytes)
 {
     if ( err) return 0;
     std::string str = "\r\n\r\n";
