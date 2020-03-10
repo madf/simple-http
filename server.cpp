@@ -1,8 +1,8 @@
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <functional> // std::bind
 #include <algorithm> // std::search
 #include <ctime>
 
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
             tcp::socket socket(io_service);
             acceptor.accept(socket);
 
-            int bytes = read(socket, boost::asio::buffer(buff), boost::bind(read_complete, buff, _1, _2));
+            int bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, std::placeholders::_1, std::placeholders::_2));
 
             std::string msg(buff, bytes);
 
@@ -133,6 +133,7 @@ int main(int argc, char* argv[])
                 error_message += "505 HTTP Version Not Supported\n";
 
             boost::system::error_code ignored_error;
+
             if (!error_message.empty())
                 boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
 
@@ -157,6 +158,5 @@ int main(int argc, char* argv[])
     {
         std::cerr << e.what() << "\n";
     }
-
     return 0;
 }
