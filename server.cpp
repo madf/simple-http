@@ -35,7 +35,7 @@ size_t read_complete(char* buff, const error_code& err, size_t bytes)
 {
     if ( err) return 0;
     const std::string str = "\r\n\r\n";
-    bool found = std::search(buff, buff + bytes, str.begin(), str.end()) != buff + bytes;
+    const bool found = std::search(buff, buff + bytes, str.begin(), str.end()) != buff + bytes;
     return found ? 0 : 1;
 }
 
