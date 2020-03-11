@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
             const std::string msg(buff, bytes);
 
-            size_t str_end_pos = msg.find("\r");
+            const size_t str_end_pos = msg.find("\r");
             std::string start_str = msg.substr(0, str_end_pos);
             std::string http_version = start_str.substr(str_end_pos - 3);
             std::string error_message;
