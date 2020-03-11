@@ -110,8 +110,6 @@ int main(int argc, char* argv[])
         char buff[1024];
 
         std::ofstream fout;
-        if (outfile.empty())
-            fout.close();
 
         for (;;)
         {
@@ -142,7 +140,7 @@ int main(int argc, char* argv[])
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
 
             std::string log_message = message + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
-            if (fout)
+            if (!outfile.empty())
             {
                 fout.open(outfile, std::ios::app);
                 fout << log_message << "\n";
