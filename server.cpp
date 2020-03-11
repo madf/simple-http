@@ -122,12 +122,12 @@ int main(int argc, char* argv[])
 
             const size_t str_end_pos = msg.find("\r");
             const std::string start_str = msg.substr(0, str_end_pos);
-            std::string http_version = start_str.substr(str_end_pos - 3);
+            const std::string http_version = start_str.substr(str_end_pos - 8);
             std::string error_message;
 
             if (start_str.substr(0, 3) != "GET")
                 error_message = "405 Method not allowed\n";
-            if (http_version != "1.1" && http_version != "1.0")
+            if (http_version != "HTTP/1.1" && http_version != "HTTP/1.0")
                 error_message += "505 HTTP Version Not Supported\n";
 
             boost::system::error_code ignored_error;
