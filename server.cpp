@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
 
             const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, std::placeholders::_1, std::placeholders::_2));
 
-            std::string msg(buff, bytes);
+            const std::string msg(buff, bytes);
 
             size_t str_end_pos = msg.find("\r");
             std::string start_str = msg.substr(0, str_end_pos);
