@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
             tcp::socket socket(io_service);
             acceptor.accept(socket);
 
-            int bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, std::placeholders::_1, std::placeholders::_2));
+            const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, std::placeholders::_1, std::placeholders::_2));
 
             std::string msg(buff, bytes);
 
