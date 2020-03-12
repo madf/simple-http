@@ -131,16 +131,16 @@ int main(int argc, char* argv[])
                 error_message += http_version + " 505 HTTP Version Not Supported\r\n";
 
             error_code ignored_error;
-            //boost::system::error_code ignored_error;
 
             if (!error_message.empty())
                 boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
 
-            const std::string message = make_daytime_string();
+            const std::string date = make_daytime_string();
+            const std::string message = "HTTP/1.1 200 OK\r\nHOST: 127.0.0.1\r\n\r\n" + date;
 
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
 
-            std::string log_message = message + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
+            std::string log_message = date + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
             if (!outfile.empty())
             {
                 fout.open(outfile, std::ios::app);
