@@ -126,9 +126,9 @@ int main(int argc, char* argv[])
             std::string error_message;
 
             if (start_str.substr(0, 3) != "GET")
-                error_message = "405 Method not allowed\n";
+                error_message = http_version + " 405 Method not allowed\r\n";
             if (http_version != "HTTP/1.1" && http_version != "HTTP/1.0")
-                error_message += "505 HTTP Version Not Supported\n";
+                error_message += http_version + " 505 HTTP Version Not Supported\r\n";
 
             boost::system::error_code ignored_error;
 
