@@ -130,7 +130,8 @@ int main(int argc, char* argv[])
             if (http_version != "HTTP/1.1" && http_version != "HTTP/1.0")
                 error_message += http_version + " 505 HTTP Version Not Supported\r\n";
 
-            boost::system::error_code ignored_error;
+            error_code ignored_error;
+            //boost::system::error_code ignored_error;
 
             if (!error_message.empty())
                 boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
