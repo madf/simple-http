@@ -128,9 +128,9 @@ int main(int argc, char* argv[])
             std::string error_message;
 
             if (start_str.substr(0, 3) != "GET")
-                error_message = http_version + " 405 Method not allowed\r\n";
+                error_message = "HTTP/1.1 405 Method not allowed\r\n";
             if (http_version != "HTTP/1.1" && http_version != "HTTP/1.0")
-                error_message += http_version + " 505 HTTP Version Not Supported\r\n";
+                error_message += "HTTP/1.1 505 HTTP Version Not Supported\r\n";
 
             error_code ignored_error;
 
