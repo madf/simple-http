@@ -107,6 +107,8 @@ int main(int argc, char* argv[])
         tcp::resolver resolver(io_service);
         tcp::acceptor acceptor(io_service, *resolver.resolve(tcp::resolver::query(host, port)));
 
+        namespace pls = std::placeholders;
+
         char buff[1024];
 
         std::ofstream fout;
@@ -116,7 +118,7 @@ int main(int argc, char* argv[])
             tcp::socket socket(io_service);
             acceptor.accept(socket);
 
-            const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, std::placeholders::_1, std::placeholders::_2));
+            const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
 
             const std::string msg(buff, bytes);
 
