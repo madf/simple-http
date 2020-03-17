@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
                 boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
 
             const std::string date = make_daytime_string();
-            const std::string message = "HTTP/1.1 200 OK\r\nHOST: 127.0.0.1\r\n\r\n" + date;
+            const std::string message = "HTTP/1.1 200 OK\r\nHost: localhost\r\n\r\n" + date;
 
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
 
