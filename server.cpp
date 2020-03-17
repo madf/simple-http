@@ -134,13 +134,17 @@ int main(int argc, char* argv[])
 
             error_code ignored_error;
 
-            if (!error_message.empty())
-                boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
-
             const std::string date = make_daytime_string();
-            const std::string message = "HTTP/1.1 200 OK\r\nHost: localhost\r\n\r\n" + date;
 
-            boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+            if (!error_message.empty())
+            {
+                boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
+            }
+            else
+            {
+                const std::string message = "HTTP/1.1 200 OK\r\nHost: localhost\r\n\r\n" + date;
+                boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+            }
 
             std::string log_message = date + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
             if (!outfile.empty())
