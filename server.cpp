@@ -39,6 +39,21 @@ size_t read_complete(const char* buff, const error_code& err, size_t bytes)
     return found ? 0 : 1;
 }
 
+void write_log(const std::string& outfile, const std::string& log_message)
+{
+    if (!outfile.empty())
+    {
+        std::ofstream fout(outfile, std::ios::app);
+        fout << log_message << "\n";
+        fout.close();
+    }
+    else
+    {
+        std::cout << log_message << "\n";
+    }
+    return;
+}
+
 int main(int argc, char* argv[])
 {
     const std::string version = "1.1.0";
@@ -145,16 +160,7 @@ int main(int argc, char* argv[])
             }
 
             std::string log_message = date + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
-            if (!outfile.empty())
-            {
-                std::ofstream fout(outfile, std::ios::app);
-                fout << log_message << "\n";
-                fout.close();
-            }
-            else
-            {
-                std::cout << log_message << "\n";
-            }
+            write_log(outfile, log_message);
         }
     }
     catch (const std::exception& e)
