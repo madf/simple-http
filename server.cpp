@@ -111,8 +111,6 @@ int main(int argc, char* argv[])
 
         char buff[1024];
 
-        std::ofstream fout;
-
         for (;;)
         {
             tcp::socket socket(io_service);
@@ -149,7 +147,7 @@ int main(int argc, char* argv[])
             std::string log_message = date + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
             if (!outfile.empty())
             {
-                fout.open(outfile, std::ios::app);
+                std::ofstream fout(outfile, std::ios::app);
                 fout << log_message << "\n";
                 fout.close();
             }
