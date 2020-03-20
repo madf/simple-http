@@ -45,7 +45,6 @@ void write_log(const std::string& outfile, const std::string& log_message)
     {
         std::ofstream fout(outfile, std::ios::app);
         fout << log_message << "\n";
-        fout.close();
     }
     else
     {
