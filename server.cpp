@@ -50,7 +50,6 @@ void write_log(const std::string& outfile, const std::string& log_message)
     {
         std::cout << log_message << "\n";
     }
-    return;
 }
 
 std::string write_response(tcp::socket& socket, const std::string& start_str, const std::string& http_version)
