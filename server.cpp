@@ -1,3 +1,4 @@
+#include "request.h"
 #include <boost/asio.hpp>
 #include <iostream>
 #include <fstream>
@@ -52,13 +53,13 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
-std::string write_response(tcp::socket& socket, const std::string& start_str, const std::string& http_version)
+std::string write_response(tcp::socket& socket, const Request& request)
 {
     std::string error_message;
 
-    if (start_str.substr(0, 3) != "GET")
+    if (request.verb() != "GET")
         error_message = "HTTP/1.1 405 Method not allowed\r\n";
-    if (http_version != "HTTP/1.1" && http_version != "HTTP/1.0")
+    if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
         error_message += "HTTP/1.1 505 HTTP Version Not Supported\r\n";
 
     error_code ignored_error;
@@ -157,12 +158,12 @@ int main(int argc, char* argv[])
             const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
 
             const std::string msg(buff, bytes);
-
             const size_t str_end_pos = msg.find("\r");
             const std::string start_str = msg.substr(0, str_end_pos);
-            const std::string http_version = start_str.substr(str_end_pos - 8);
 
-            const std::string date = write_response(socket, start_str, http_version);
+            Request request(start_str);
+
+            const std::string date = write_response(socket, request);
 
             std::string log_message = date + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
 
