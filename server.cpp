@@ -165,9 +165,7 @@ int main(int argc, char* argv[])
 
             const std::string date = write_response(socket, request);
 
-            std::string log_message = date + " " + socket.remote_endpoint().address().to_string() + " " + start_str;
-
-            write_log(outfile, log_message);
+            write_log(outfile, date + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
         }
     }
     catch (const std::exception& e)
