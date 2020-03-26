@@ -161,9 +161,7 @@ int main(int argc, char* argv[])
             const size_t str_end_pos = msg.find("\r");
             const std::string start_str = msg.substr(0, str_end_pos);
 
-            Request request(start_str);
-
-            const std::string date = write_response(socket, request);
+            const std::string date = write_response(socket, Request(start_str));
 
             write_log(outfile, date + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
         }
