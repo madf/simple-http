@@ -1,10 +1,15 @@
 #include "request.h"
 
 Request::Request(const std::string& start_str)
-    : m_verb(start_str.substr(0, 3)),
-      m_path(start_str.substr(4, start_str.length() - 4 - 9)),
-      m_version(start_str.substr(start_str.length() - 8))
 {
+    size_t pos_space_first = start_str.find_first_of(' ');
+
+    m_verb = start_str.substr(0, pos_space_first);
+
+    size_t pos_space_second = start_str.find_last_of(' ');
+
+    m_path = start_str.substr(pos_space_first + 1, pos_space_second - pos_space_first - 1);
+    m_version = start_str.substr(pos_space_second + 1);
 }
 
 const std::string& Request::verb() const
