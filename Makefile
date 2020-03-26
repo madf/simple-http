@@ -9,7 +9,7 @@ SOURCES = server.cpp \
 all: server
 
 server: server.o request.o
-	$(CXX) $< $(LDFLAGS) request.o -o $@
+	$(CXX) $^ $(LDFLAGS) -o $@
 
 clean:
 	rm *.o *.d server
