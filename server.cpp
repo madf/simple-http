@@ -53,7 +53,7 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
-std::string write_response(tcp::socket& socket, const Request& request)
+void write_response(tcp::socket& socket, const Request& request, const std::string date)
 {
     std::string error_message;
 
@@ -64,8 +64,6 @@ std::string write_response(tcp::socket& socket, const Request& request)
 
     error_code ignored_error;
 
-    const std::string date = make_daytime_string();
-
     if (!error_message.empty())
     {
         boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
@@ -75,7 +73,6 @@ std::string write_response(tcp::socket& socket, const Request& request)
         const std::string message = "HTTP/1.1 200 OK\r\nHost: localhost\r\n\r\n" + date;
         boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
     }
-    return date;
 }
 
 int main(int argc, char* argv[])
@@ -161,7 +158,9 @@ int main(int argc, char* argv[])
             const size_t str_end_pos = msg.find('\r');
             const std::string start_str = msg.substr(0, str_end_pos);
 
-            const std::string date = write_response(socket, Request(start_str));
+            const std::string date = make_daytime_string();
+
+            write_response(socket, Request(start_str), date);
 
             write_log(outfile, date + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
         }
