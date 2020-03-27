@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
             const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
 
             const std::string msg(buff, bytes);
-            const size_t str_end_pos = msg.find("\r");
+            const size_t str_end_pos = msg.find('\r');
             const std::string start_str = msg.substr(0, str_end_pos);
 
             const std::string date = write_response(socket, Request(start_str));
