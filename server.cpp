@@ -77,7 +77,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
 
 int main(int argc, char* argv[])
 {
-    const std::string version = "1.1.0";
+    const std::string version = "1.2.0";
     std::string address;
     std::string outfile;
 
