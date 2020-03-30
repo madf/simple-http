@@ -53,7 +53,7 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
-void write_response(tcp::socket& socket, const Request& request, const std::string date)
+void write_response(tcp::socket& socket, const Request& request, const std::string& date)
 {
     std::string error_message;
 
