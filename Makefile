@@ -1,14 +1,15 @@
 CXXFLAGS = -W -Wall -Wextra -std=c++11
 LDFLAGS = -lboost_system -lpthread
 
-SOURCES = server.cpp
+SOURCES = server.cpp \
+		  request.cpp
 
 .PHONY: all clean
 
 all: server
 
-server: server.o
-	$(CXX) $< $(LDFLAGS) -o $@
+server: server.o request.o
+	$(CXX) $^ $(LDFLAGS) -o $@
 
 clean:
 	rm *.o *.d server
