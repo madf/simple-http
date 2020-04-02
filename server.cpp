@@ -69,7 +69,17 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
     }
     else
     {
-        const std::string message = "HTTP/1.1 200 OK\r\nHost: localhost\r\n\r\n" + date;
+        const std::string table_html ="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"> \
+            <html> \
+            <body> \
+            <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
+            <tr><td>File name</td><td>File size</td><td>Last modified date</td></tr> \
+            </table> \
+            </body> \
+            </html>";
+
+        const std::string message = "HTTP/1.1 200 OK\r\nHost: localhost\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + date + "\r" + table_html;
+
         boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
     }
 }
