@@ -6,6 +6,7 @@
 #include <functional> // std::bind
 #include <algorithm> // std::search
 #include <ctime>
+#include <dirent.h> //struct dirent, opendir, readdir, closedir
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
