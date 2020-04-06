@@ -7,6 +7,8 @@
 #include <algorithm> // std::search
 #include <ctime>
 #include <dirent.h> //struct dirent, opendir, readdir, closedir
+#include <sys/stat.h> //stat, struct stat
+#include <time.h> //localtime, asctime
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
@@ -53,7 +55,46 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
-void write_response(tcp::socket& socket, const Request& request, const std::string& date)
+std::string make_message(const std::string& path, const std::string date, std::string& error_message)
+{
+        DIR *dir = opendir(path.c_str());
+        if (dir == NULL)
+            error_message = "HTTP/1.1 500 Directory failed to open\r\n";
+
+        std::string file_name;
+        std::string line;
+
+        for (struct dirent *entry = readdir(dir); entry != NULL; entry = readdir(dir))
+        {
+            if (strcmp(".", entry->d_name) && strcmp("..", entry->d_name))
+            {
+                file_name = entry->d_name;
+                std::string path_file = path + "/" + file_name;
+
+                struct stat st;
+                if (stat(path_file.c_str(), &st) < 0)
+                    error_message = "HTTP/1.1 404 File does not exist or does not have access: " + path_file + "\r\n";
+
+                std::string file_date = asctime(localtime(&st.st_ctime));
+
+                line = line + "<tr><td>" + file_name + "</td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td>" + "</tr>";
+            }
+        }
+        closedir(dir);
+
+        const std::string table_html ="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"> \
+            <html> \
+            <body> \
+            <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
+            <tr><td>File name</td><td>File size</td><td>Last modified date</td></tr>" + line + " \
+            </table> \
+            </body> \
+            </html>";
+
+        return "HTTP/1.1 200 OK\r\nHost: localhost\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + date + "\r\n" + table_html;
+}
+
+void write_response(tcp::socket& socket, const Request& request, const std::string& date, const std::string& work_dir)
 {
     std::string error_message;
 
@@ -70,16 +111,14 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
     }
     else
     {
-        const std::string table_html ="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"> \
-            <html> \
-            <body> \
-            <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
-            <tr><td>File name</td><td>File size</td><td>Last modified date</td></tr> \
-            </table> \
-            </body> \
-            </html>";
+        std::string path;
 
-        const std::string message = "HTTP/1.1 200 OK\r\nHost: localhost\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + date + "\r" + table_html;
+        if (!work_dir.empty())
+            path = work_dir;
+        else
+            path = ".";
+
+        std::string message = make_message(path, date, error_message);
 
         boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
     }
@@ -180,7 +219,7 @@ int main(int argc, char* argv[])
 
             const std::string date = make_daytime_string();
 
-            write_response(socket, Request(start_str), date);
+            write_response(socket, Request(start_str), date, work_dir);
 
             write_log(outfile, date + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
         }
