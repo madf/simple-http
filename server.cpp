@@ -77,7 +77,7 @@ std::string make_message(const std::string& path, const std::string date, std::s
 
                 std::string file_date = asctime(localtime(&st.st_ctime));
 
-                line = line + "<tr><td>" + file_name + "</td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td>" + "</tr>";
+                line = line + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
             }
         }
         closedir(dir);
