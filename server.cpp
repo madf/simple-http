@@ -55,12 +55,8 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
-std::string make_message(const std::string& path, const std::string date, std::string& error_message)
+std::string make_message(DIR *dir, const std::string& path, const std::string date)
 {
-        DIR *dir = opendir(path.c_str());
-        if (dir == NULL)
-            error_message = "HTTP/1.1 500 Directory failed to open\r\n";
-
         std::string file_name;
         std::string line;
 
@@ -122,9 +118,17 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         else
             path = ".";
 
-        std::string message = make_message(path, date, error_message);
-
-        boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+        DIR *dir = opendir(path.c_str());
+        if (dir == NULL)
+        {
+            error_message = "HTTP/1.1 500 Directory failed to open\r\n";
+            boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
+        }
+        else
+        {
+            std::string message = make_message(dir, path, date);
+            boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+        }
     }
 }
 
