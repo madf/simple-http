@@ -69,15 +69,19 @@ std::string make_message(const std::string& path, const std::string date, std::s
             if (strcmp(".", entry->d_name) && strcmp("..", entry->d_name))
             {
                 file_name = entry->d_name;
+
                 std::string path_file = path + "/" + file_name;
 
                 struct stat st;
                 if (stat(path_file.c_str(), &st) < 0)
-                    error_message = "HTTP/1.1 404 File does not exist or does not have access: " + path_file + "\r\n";
-
-                std::string file_date = asctime(localtime(&st.st_ctime));
-
-                line = line + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
+                {
+                    line = line + "<tr><td>" + file_name + "</td><td>?</td><td>?</td></tr>";
+                }
+                else
+                {
+                    std::string file_date = asctime(localtime(&st.st_ctime));
+                    line = line + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
+                }
             }
         }
         closedir(dir);
