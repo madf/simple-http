@@ -94,6 +94,24 @@ std::string make_message(DIR *dir, const std::string& path, const std::string da
         return "HTTP/1.1 200 OK\r\nHost: localhost\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + date + "\r\n" + table_html;
 }
 
+void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, error_code ignored_error)
+{
+    std::ifstream fin(path + "/" + request_path_file);
+
+    char buff[1024] = {0};
+    while (!fin.eof())
+    {
+        fin.read(buff, 1024);
+
+        std::streamsize len = fin.gcount();
+        if (len > 0)
+        {
+            std::string msg(buff, len);
+            boost::asio::write(socket, boost::asio::buffer(msg), ignored_error);
+        }
+    }
+}
+
 void write_response(tcp::socket& socket, const Request& request, const std::string& date, const std::string& work_dir)
 {
     std::string error_message;
@@ -128,6 +146,10 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         {
             std::string message = make_message(dir, path, date);
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+
+            std::string request_path_file = request.path();
+            if (request_path_file != "/")
+                write_file(socket, request_path_file, path, ignored_error);
         }
     }
 }
