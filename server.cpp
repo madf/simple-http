@@ -55,7 +55,7 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
-std::string make_message(DIR *dir, const std::string& path, const std::string date)
+std::string make_message(DIR *dir, const std::string& path, const std::string& date)
 {
         std::string file_name;
         std::string line;
@@ -66,10 +66,8 @@ std::string make_message(DIR *dir, const std::string& path, const std::string da
             {
                 file_name = entry->d_name;
 
-                std::string path_file = path + "/" + file_name;
-
                 struct stat st;
-                if (stat(path_file.c_str(), &st) < 0)
+                if (stat((path + "/" + file_name).c_str(), &st) < 0)
                 {
                     line = line + "<tr><td>" + file_name + "</td><td>?</td><td>?</td></tr>";
                 }
@@ -144,10 +142,9 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         }
         else
         {
-            std::string message = make_message(dir, path, date);
-            boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+            boost::asio::write(socket, boost::asio::buffer(make_message(dir, path, date)), ignored_error);
 
-            std::string request_path_file = request.path();
+            const std::string request_path_file = request.path();
             if (request_path_file != "/")
                 write_file(socket, request_path_file, path, ignored_error);
         }
