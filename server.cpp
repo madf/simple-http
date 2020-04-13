@@ -57,14 +57,13 @@ void write_log(const std::string& outfile, const std::string& log_message)
 
 std::string make_message(DIR *dir, const std::string& path, const std::string& date)
 {
-        std::string file_name;
         std::string line;
 
         for (struct dirent *entry = readdir(dir); entry != NULL; entry = readdir(dir))
         {
             if (strcmp(".", entry->d_name) && strcmp("..", entry->d_name))
             {
-                file_name = entry->d_name;
+                const std::string file_name = entry->d_name;
 
                 struct stat st;
                 if (stat((path + "/" + file_name).c_str(), &st) < 0)
