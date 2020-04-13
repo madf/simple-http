@@ -8,7 +8,6 @@
 #include <ctime>
 #include <dirent.h> //struct dirent, opendir, readdir, closedir
 #include <sys/stat.h> //stat, struct stat
-#include <time.h> //localtime, asctime
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
@@ -72,7 +71,7 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
                 }
                 else
                 {
-                    std::string file_date = asctime(localtime(&st.st_ctime));
+                    const std::string file_date = ctime(&st.st_ctime);
                     line = line + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
                 }
             }
