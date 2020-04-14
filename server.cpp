@@ -87,7 +87,7 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
             </body> \
             </html>";
 
-        return "HTTP/1.1 200 OK\r\nHost: localhost\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + date + "\r\n" + table_html;
+        return "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + date + "\r\n" + table_html;
 }
 
 void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, error_code ignored_error)
