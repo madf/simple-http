@@ -78,7 +78,7 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
         }
         closedir(dir);
 
-        const std::string table_html ="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"> \
+        const std::string table_html ="<!DOCTYPE html> \
             <html> \
             <body> \
             <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
