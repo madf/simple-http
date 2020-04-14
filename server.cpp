@@ -76,7 +76,6 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
                 }
             }
         }
-        closedir(dir);
 
         const std::string table_html ="<!DOCTYPE html> \
             <html> \
@@ -141,6 +140,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         else
         {
             boost::asio::write(socket, boost::asio::buffer(make_message(dir, path, date)), ignored_error);
+            closedir(dir);
 
             const std::string request_path_file = request.path();
             if (request_path_file != "/")
