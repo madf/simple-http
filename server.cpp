@@ -81,7 +81,7 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
             <html> \
             <body> \
             <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
-            <tr><td>File name</td><td>File size</td><td>Last modified date</td></tr>" + lines + " \
+            <tr><td>File name</td><td>File size</td><td>Last modification date</td></tr>" + lines + " \
             </table> \
             </body> \
             </html>";
