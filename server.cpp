@@ -100,10 +100,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
 
         std::streamsize len = fin.gcount();
         if (len > 0)
-        {
-            std::string msg(buff, len);
-            boost::asio::write(socket, boost::asio::buffer(msg), ignored_error);
-        }
+            boost::asio::write(socket, boost::asio::buffer(buff, len), ignored_error);
     }
 }
 
