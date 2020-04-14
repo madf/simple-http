@@ -134,7 +134,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         DIR *dir = opendir(path.c_str());
         if (dir == NULL)
         {
-            error_message = "HTTP/1.1 500 Directory failed to open\r\n";
+            error_message = "HTTP/1.1 500 Failed to open directory\r\n";
             boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
         }
         else
