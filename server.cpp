@@ -56,7 +56,7 @@ void write_log(const std::string& outfile, const std::string& log_message)
 
 std::string make_message(DIR *dir, const std::string& path, const std::string& date)
 {
-        std::string line;
+        std::string lines;
 
         for (struct dirent *entry = readdir(dir); entry != NULL; entry = readdir(dir))
         {
@@ -67,12 +67,12 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
                 struct stat st;
                 if (stat((path + "/" + file_name).c_str(), &st) < 0)
                 {
-                    line = line + "<tr><td>" + file_name + "</td><td>?</td><td>?</td></tr>";
+                    lines = lines + "<tr><td>" + file_name + "</td><td>?</td><td>?</td></tr>";
                 }
                 else
                 {
                     const std::string file_date = ctime(&st.st_ctime);
-                    line = line + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
+                    lines = lines + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
                 }
             }
         }
@@ -82,7 +82,7 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
             <html> \
             <body> \
             <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
-            <tr><td>File name</td><td>File size</td><td>Last modified date</td></tr>" + line + " \
+            <tr><td>File name</td><td>File size</td><td>Last modified date</td></tr>" + lines + " \
             </table> \
             </body> \
             </html>";
