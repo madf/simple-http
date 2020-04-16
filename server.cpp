@@ -6,8 +6,12 @@
 #include <functional> // std::bind
 #include <algorithm> // std::search
 #include <ctime>
+#include <cerrno>
 #include <dirent.h> //struct dirent, opendir, readdir, closedir
-#include <sys/stat.h> //stat, struct stat
+#include <sys/stat.h> //stat, struct stat, open
+#include <sys/types.h> //open
+#include <fcntl.h> //open
+#include <unistd.h> //read
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
@@ -91,16 +95,23 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
 
 void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, error_code ignored_error)
 {
-    std::ifstream fin(path + "/" + request_path_file);
-
-    char buff[1024] = {0};
-    while (!fin.eof())
+    int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
+    size_t len;
+    if (fd == -1)
     {
-        fin.read(buff, 1024);
-
-        std::streamsize len = fin.gcount();
-        if (len > 0)
-            boost::asio::write(socket, boost::asio::buffer(buff, len), ignored_error);
+        if (errno == ENOENT)
+            boost::asio::write(socket, boost::asio::buffer("HTTP/1.1 403 File does not exist\r\n"), ignored_error);
+        if (errno == EACCES)
+            boost::asio::write(socket, boost::asio::buffer("HTTP/1.1 403 File access not allowed\r\n"), ignored_error);
+    }
+    else
+    {
+        char buff[1024] = {0};
+        while ((len = read(fd, buff, 1024)) != 0)
+        {
+            if (len > 0)
+                boost::asio::write(socket, boost::asio::buffer(buff, len), ignored_error);
+        }
     }
 }
 
