@@ -58,7 +58,7 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
-std::string make_message(DIR *dir, const std::string& path, const std::string& date)
+std::string make_message(DIR *dir, const std::string& path)
 {
         std::string lines;
 
@@ -90,7 +90,7 @@ std::string make_message(DIR *dir, const std::string& path, const std::string& d
             </body> \
             </html>";
 
-        return "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + date + "\r\n" + table_html;
+        return "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
 }
 
 void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, error_code ignored_error)
@@ -115,7 +115,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
     }
 }
 
-void write_response(tcp::socket& socket, const Request& request, const std::string& date, const std::string& work_dir)
+void write_response(tcp::socket& socket, const Request& request, const std::string& work_dir)
 {
     std::string error_message;
 
@@ -147,7 +147,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         }
         else
         {
-            boost::asio::write(socket, boost::asio::buffer(make_message(dir, path, date)), ignored_error);
+            boost::asio::write(socket, boost::asio::buffer(make_message(dir, path)), ignored_error);
             closedir(dir);
 
             const std::string request_path_file = request.path();
@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
 
             const std::string date = make_daytime_string();
 
-            write_response(socket, Request(start_str), date, work_dir);
+            write_response(socket, Request(start_str), work_dir);
 
             write_log(outfile, date + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
         }
