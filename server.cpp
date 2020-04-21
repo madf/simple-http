@@ -95,6 +95,7 @@ std::string make_message(DIR *dir, const std::string& path)
 
 void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, error_code ignored_error)
 {
+    boost::asio::write(socket, boost::asio::buffer( "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Disposition: attachment\r\n\r\n"), ignored_error);
     int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
     size_t len;
     if (fd == -1)
@@ -147,12 +148,16 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         }
         else
         {
-            boost::asio::write(socket, boost::asio::buffer(make_message(dir, path)), ignored_error);
-            closedir(dir);
-
             const std::string request_path_file = request.path();
-            if (request_path_file != "/")
+            if (request_path_file == "/")
+            {
+                boost::asio::write(socket, boost::asio::buffer(make_message(dir, path)), ignored_error);
+                closedir(dir);
+            }
+            else
+            {
                 write_file(socket, request_path_file, path, ignored_error);
+            }
         }
     }
 }
