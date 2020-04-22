@@ -60,37 +60,37 @@ void write_log(const std::string& outfile, const std::string& log_message)
 
 std::string make_message(DIR *dir, const std::string& path)
 {
-        std::string lines;
+    std::string lines;
 
-        for (struct dirent *entry = readdir(dir); entry != NULL; entry = readdir(dir))
+    for (struct dirent *entry = readdir(dir); entry != NULL; entry = readdir(dir))
+    {
+        if (strcmp(".", entry->d_name) && strcmp("..", entry->d_name))
         {
-            if (strcmp(".", entry->d_name) && strcmp("..", entry->d_name))
-            {
-                const std::string file_name = entry->d_name;
+            const std::string file_name = entry->d_name;
 
-                struct stat st;
-                if (stat((path + "/" + file_name).c_str(), &st) < 0)
-                {
-                    lines = lines + "<tr><td>" + file_name + "</td><td>?</td><td>?</td></tr>";
-                }
-                else
-                {
-                    const std::string file_date = ctime(&st.st_ctime);
-                    lines = lines + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
-                }
+            struct stat st;
+            if (stat((path + "/" + file_name).c_str(), &st) < 0)
+            {
+                lines = lines + "<tr><td>" + file_name + "</td><td>?</td><td>?</td></tr>";
+            }
+            else
+            {
+                const std::string file_date = ctime(&st.st_ctime);
+                lines = lines + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
             }
         }
+    }
 
-        const std::string table_html ="<!DOCTYPE html> \
-            <html> \
-            <body> \
-            <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
-            <tr><td>File name</td><td>File size</td><td>Last modification date</td></tr>" + lines + " \
-            </table> \
-            </body> \
-            </html>";
+    const std::string table_html ="<!DOCTYPE html> \
+        <html> \
+        <body> \
+        <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
+        <tr><td>File name</td><td>File size</td><td>Last modification date</td></tr>" + lines + " \
+        </table> \
+        </body> \
+        </html>";
 
-        return "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
+    return "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
 }
 
 void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, error_code ignored_error)
