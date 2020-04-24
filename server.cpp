@@ -93,10 +93,13 @@ std::string make_message(DIR *dir, const std::string& path)
     return "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
 }
 
-void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, error_code ignored_error)
+void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path)
 {
     int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
+
+    error_code ignored_error;
     std::string str_response;
+
     if (fd == -1)
     {
         if (errno == ENOENT)
@@ -160,7 +163,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
             }
             else
             {
-                write_file(socket, request_path_file, path, ignored_error);
+                write_file(socket, request_path_file, path);
             }
         }
     }
