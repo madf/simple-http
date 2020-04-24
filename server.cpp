@@ -96,20 +96,25 @@ std::string make_message(DIR *dir, const std::string& path)
 void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, error_code ignored_error)
 {
     int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
-    size_t len;
+    std::string str_response;
     if (fd == -1)
     {
         if (errno == ENOENT)
-            boost::asio::write(socket, boost::asio::buffer("HTTP/1.1 403 File does not exist\r\n"), ignored_error);
-        if (errno == EACCES)
-            boost::asio::write(socket, boost::asio::buffer("HTTP/1.1 403 File access not allowed\r\n"), ignored_error);
+            str_response = "HTTP/1.1 403 File does not exist\r\n";
+        else if (errno == EACCES)
+            str_response = "HTTP/1.1 403 File access not allowed\r\n";
+        else
+            str_response = "HTTP/1.1 500 File open error\r\n";
+
+        boost::asio::write(socket, boost::asio::buffer(str_response), ignored_error);
     }
     else
     {
+        str_response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Disposition: attachment\r\n\r\n";
+        boost::asio::write(socket, boost::asio::buffer(str_response), ignored_error);
+
         char buff[1024] = {0};
-
-        boost::asio::write(socket, boost::asio::buffer("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Disposition: attachment\r\n\r\n"), ignored_error);
-
+        size_t len;
         while ((len = read(fd, buff, 1024)) > 0)
             boost::asio::write(socket, boost::asio::buffer(buff, len), ignored_error);
     }
