@@ -58,7 +58,7 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
-std::string make_message(DIR *dir, const std::string& path)
+void send_index(tcp::socket& socket, DIR *dir, const std::string& path)
 {
     std::string lines;
 
@@ -90,7 +90,10 @@ std::string make_message(DIR *dir, const std::string& path)
         </body> \
         </html>";
 
-    return "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
+    std::string index =  "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
+
+    error_code ignored_error;
+    boost::asio::write(socket, boost::asio::buffer(index), ignored_error);
 }
 
 void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path)
@@ -158,7 +161,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
             const std::string request_path_file = request.path();
             if (request_path_file == "/")
             {
-                boost::asio::write(socket, boost::asio::buffer(make_message(dir, path)), ignored_error);
+                send_index(socket, dir, path);
                 closedir(dir);
             }
             else
