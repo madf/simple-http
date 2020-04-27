@@ -155,24 +155,24 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         else
             path = ".";
 
-        DIR *dir = opendir(path.c_str());
-        if (dir == NULL)
+        const std::string request_path_file = request.path();
+        if (request_path_file == "/")
         {
-            error_message = "HTTP/1.1 500 Failed to open directory\r\n";
-            send_string(socket, error_message);
-        }
-        else
-        {
-            const std::string request_path_file = request.path();
-            if (request_path_file == "/")
+            DIR *dir = opendir(path.c_str());
+            if (dir == NULL)
             {
-                send_index(socket, dir, path);
-                closedir(dir);
+                error_message = "HTTP/1.1 500 Failed to open directory\r\n";
+                send_string(socket, error_message);
             }
             else
             {
-                write_file(socket, request_path_file, path);
+            send_index(socket, dir, path);
+            closedir(dir);
             }
+        }
+        else
+        {
+            write_file(socket, request_path_file, path);
         }
     }
 }
