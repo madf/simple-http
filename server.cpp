@@ -58,6 +58,12 @@ void write_log(const std::string& outfile, const std::string& log_message)
     }
 }
 
+void send_string(tcp::socket& socket, const std::string& str)
+{
+    error_code ignored_error;
+    boost::asio::write(socket, boost::asio::buffer(str), ignored_error);
+}
+
 void send_index(tcp::socket& socket, DIR *dir, const std::string& path)
 {
     std::string lines;
@@ -92,15 +98,13 @@ void send_index(tcp::socket& socket, DIR *dir, const std::string& path)
 
     std::string index =  "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
 
-    error_code ignored_error;
-    boost::asio::write(socket, boost::asio::buffer(index), ignored_error);
+    send_string(socket, index);
 }
 
 void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path)
 {
     int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
 
-    error_code ignored_error;
     std::string str_response;
 
     if (fd == -1)
@@ -112,15 +116,18 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
         else
             str_response = "HTTP/1.1 500 File open error\r\n";
 
-        boost::asio::write(socket, boost::asio::buffer(str_response), ignored_error);
+        send_string(socket, str_response);
     }
     else
     {
         str_response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Disposition: attachment\r\n\r\n";
-        boost::asio::write(socket, boost::asio::buffer(str_response), ignored_error);
+
+        send_string(socket, str_response);
 
         char buff[1024] = {0};
         size_t len;
+        error_code ignored_error;
+
         while ((len = read(fd, buff, 1024)) > 0)
             boost::asio::write(socket, boost::asio::buffer(buff, len), ignored_error);
     }
@@ -135,11 +142,9 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
         error_message += "HTTP/1.1 505 HTTP Version Not Supported\r\n";
 
-    error_code ignored_error;
-
     if (!error_message.empty())
     {
-        boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
+        send_string(socket, error_message);
     }
     else
     {
@@ -154,7 +159,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         if (dir == NULL)
         {
             error_message = "HTTP/1.1 500 Failed to open directory\r\n";
-            boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
+            send_string(socket, error_message);
         }
         else
         {
