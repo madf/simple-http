@@ -155,8 +155,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         else
             path = ".";
 
-        const std::string request_path_file = request.path();
-        if (request_path_file == "/")
+        if (request.path() == "/")
         {
             DIR *dir = opendir(path.c_str());
             if (dir == NULL)
@@ -172,7 +171,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         }
         else
         {
-            write_file(socket, request_path_file, path);
+            write_file(socket, request.path(), path);
         }
     }
 }
