@@ -110,7 +110,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
     if (fd == -1)
     {
         if (errno == ENOENT)
-            str_response = "HTTP/1.1 403 File does not exist\r\n";
+            str_response = "HTTP/1.1 404 File does not exist\r\n";
         else if (errno == EACCES)
             str_response = "HTTP/1.1 403 File access not allowed\r\n";
         else
