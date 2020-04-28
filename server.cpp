@@ -270,11 +270,9 @@ int main(int argc, char* argv[])
             const size_t str_end_pos = msg.find('\r');
             const std::string start_str = msg.substr(0, str_end_pos);
 
-            const std::string date = make_daytime_string();
-
             write_response(socket, Request(start_str), work_dir);
 
-            write_log(outfile, date + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
+            write_log(outfile, make_daytime_string() + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
         }
     }
     catch (const std::exception& e)
