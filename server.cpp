@@ -165,9 +165,9 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
             }
             else
             {
-            send_index(socket, dir, path);
-            closedir(dir);
+                send_index(socket, dir, path);
             }
+            closedir(dir);
         }
         else
         {
