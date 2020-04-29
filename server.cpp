@@ -105,24 +105,18 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
 {
     int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
 
-    std::string str_response;
-
     if (fd == -1)
     {
         if (errno == ENOENT)
-            str_response = "HTTP/1.1 404 File does not exist\r\n";
+            send_string(socket, "HTTP/1.1 404 File does not exist\r\n");
         else if (errno == EACCES)
-            str_response = "HTTP/1.1 403 File access not allowed\r\n";
+            send_string(socket, "HTTP/1.1 403 File access not allowed\r\n");
         else
-            str_response = "HTTP/1.1 500 File open error\r\n";
-
-        send_string(socket, str_response);
+            send_string(socket, "HTTP/1.1 500 File open error\r\n");
     }
     else
     {
-        str_response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Disposition: attachment\r\n\r\n";
-
-        send_string(socket, str_response);
+        send_string(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Disposition: attachment\r\n\r\n");
 
         char buff[1024] = {0};
         size_t len;
