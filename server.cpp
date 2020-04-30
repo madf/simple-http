@@ -130,16 +130,13 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
 
 void write_response(tcp::socket& socket, const Request& request, const std::string& work_dir)
 {
-    std::string error_message;
-
     if (request.verb() != "GET")
-        error_message = "HTTP/1.1 405 Method not allowed\r\n";
-    if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-        error_message += "HTTP/1.1 505 HTTP Version Not Supported\r\n";
-
-    if (!error_message.empty())
     {
-        send_string(socket, error_message);
+        send_string(socket, "HTTP/1.1 405 Method not allowed\r\n");
+    }
+    else if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
+    {
+        send_string(socket, "HTTP/1.1 505 HTTP Version Not Supported\r\n");
     }
     else
     {
@@ -154,14 +151,9 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         {
             DIR *dir = opendir(path.c_str());
             if (dir == NULL)
-            {
-                error_message = "HTTP/1.1 500 Failed to open directory\r\n";
-                send_string(socket, error_message);
-            }
+                send_string(socket, "HTTP/1.1 500 Failed to open directory\r\n");
             else
-            {
                 send_index(socket, dir, path);
-            }
             closedir(dir);
         }
         else
