@@ -47,14 +47,15 @@ size_t read_complete(const char* buff, const error_code& err, size_t bytes)
 
 void write_log(const std::string& outfile, const std::string& log_message)
 {
+    const std::string log_msg = make_daytime_string() + " " + log_message;
     if (!outfile.empty())
     {
         std::ofstream fout(outfile, std::ios::app);
-        fout << log_message << "\n";
+        fout << log_msg << "\n";
     }
     else
     {
-        std::cout << log_message << "\n";
+        std::cout << log_msg << "\n";
     }
 }
 
@@ -265,7 +266,7 @@ int main(int argc, char* argv[])
 
             write_response(socket, Request(start_str), work_dir);
 
-            write_log(outfile, make_daytime_string() + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
+            write_log(outfile, socket.remote_endpoint().address().to_string() + " " + start_str);
         }
     }
     catch (const std::exception& e)
