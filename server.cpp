@@ -113,7 +113,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
         else if (errno == EACCES)
             send_string(socket, "HTTP/1.1 403 File access not allowed\r\n");
         else
-            send_string(socket, "HTTP/1.1 500 File open error\r\n");
+            send_string(socket, "HTTP/1.1 500 File open error\r\n\r\n" + std::string(strerror(errno)));
     }
     else
     {
