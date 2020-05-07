@@ -109,11 +109,11 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
     if (fd == -1)
     {
         if (errno == ENOENT)
-            send_string(socket, "HTTP/1.1 404 File does not exist\r\n");
+            send_string(socket, "HTTP/1.1 404 File does not exist\r\nContent-Type: text/html\r\n\r\n404 File does not exist.\n");
         else if (errno == EACCES)
-            send_string(socket, "HTTP/1.1 403 File access not allowed\r\n");
+            send_string(socket, "HTTP/1.1 403 File access not allowed\r\nContent-Type: text/html\r\n\r\n403 File access not allowed.\n");
         else
-            send_string(socket, "HTTP/1.1 500 File open error\r\n\r\n" + std::string(strerror(errno)));
+            send_string(socket, "HTTP/1.1 500 File open error\r\nContent-Type: text/html\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
     }
     else
     {
@@ -132,11 +132,11 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
 {
     if (request.verb() != "GET")
     {
-        send_string(socket, "HTTP/1.1 405 Method not allowed\r\n");
+        send_string(socket, "HTTP/1.1 405 Method not allowed\r\nContent-Type: text/html\r\n\r\n405 Method not allowed.\n");
     }
     else if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
     {
-        send_string(socket, "HTTP/1.1 505 HTTP Version Not Supported\r\n");
+        send_string(socket, "HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/html\r\n\r\n505 HTTP Version Not Supported.\n");
     }
     else
     {
@@ -151,7 +151,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         {
             DIR *dir = opendir(path.c_str());
             if (dir == NULL)
-                send_string(socket, "HTTP/1.1 500 Failed to open directory\r\n");
+                send_string(socket, "HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/html\r\n\r\n500 Failed to open directory.\n");
             else
                 send_index(socket, dir, path);
             closedir(dir);
