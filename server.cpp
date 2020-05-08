@@ -61,8 +61,7 @@ void write_log(const std::string& outfile, const std::string& log_message)
 
 void send_string(tcp::socket& socket, const std::string& str)
 {
-    error_code ignored_error;
-    boost::asio::write(socket, boost::asio::buffer(str), ignored_error);
+    boost::asio::write(socket, boost::asio::buffer(str));
 }
 
 void send_index(tcp::socket& socket, DIR *dir, const std::string& path)
@@ -121,10 +120,9 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
 
         char buff[1024] = {0};
         size_t len;
-        error_code ignored_error;
 
         while ((len = read(fd, buff, 1024)) > 0)
-            boost::asio::write(socket, boost::asio::buffer(buff, len), ignored_error);
+            boost::asio::write(socket, boost::asio::buffer(buff, len));
     }
 }
 
@@ -249,21 +247,27 @@ int main(int argc, char* argv[])
         {
             tcp::socket socket(io_service);
             acceptor.accept(socket);
+            try
+            {
+                const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
 
-            const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
+                const std::string msg(buff, bytes);
+                const size_t str_end_pos = msg.find('\r');
+                const std::string start_str = msg.substr(0, str_end_pos);
 
-            const std::string msg(buff, bytes);
-            const size_t str_end_pos = msg.find('\r');
-            const std::string start_str = msg.substr(0, str_end_pos);
+                write_response(socket, Request(start_str), work_dir);
 
-            write_response(socket, Request(start_str), work_dir);
-
-            write_log(outfile, socket.remote_endpoint().address().to_string() + " " + start_str);
+                write_log(outfile, socket.remote_endpoint().address().to_string() + " " + start_str);
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "Exception: " << e.what() << "\n";
+            }
         }
     }
     catch (const std::exception& e)
     {
-        std::cerr << e.what() << "\n";
+        std::cerr << "Exception: " << e.what() << "\n";
     }
     return 0;
 }
