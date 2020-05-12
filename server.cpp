@@ -47,15 +47,14 @@ size_t read_complete(const char* buff, const error_code& err, size_t bytes)
 
 void write_log(const std::string& outfile, const std::string& log_message)
 {
-    const std::string log_msg = make_daytime_string() + " " + log_message;
     if (!outfile.empty())
     {
         std::ofstream fout(outfile, std::ios::app);
-        fout << log_msg << "\n";
+        fout << make_daytime_string() << " " << log_message << "\n";
     }
     else
     {
-        std::cout << log_msg << "\n";
+        std::cout << make_daytime_string() << " " << log_message << "\n";
     }
 }
 
