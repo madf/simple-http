@@ -130,8 +130,10 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
     if (request.verb() != "GET")
     {
         send_string(socket, "HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
+        return;
     }
-    else if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
+
+    if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
     {
         send_string(socket, "HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
     }
