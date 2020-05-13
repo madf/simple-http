@@ -115,7 +115,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
     }
     else
     {
-        send_string(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Disposition: attachment\r\n\r\n");
+        send_string(socket, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
 
         char buff[1024] = {0};
         size_t len;
