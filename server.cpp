@@ -140,12 +140,6 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
     else
     {
         const std::string path = work_dir.empty() ? "." : work_dir;
-        /*std::string path;
-
-        if (!work_dir.empty())
-            path = work_dir;
-        else
-            path = ".";*/
 
         if (request.path() == "/")
         {
