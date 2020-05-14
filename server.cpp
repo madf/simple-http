@@ -123,6 +123,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
         while ((len = read(fd, buff, 1024)) > 0)
             boost::asio::write(socket, boost::asio::buffer(buff, len));
     }
+    close(fd);
 }
 
 void write_response(tcp::socket& socket, const Request& request, const std::string& work_dir)
