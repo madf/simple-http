@@ -45,16 +45,21 @@ size_t read_complete(const char* buff, const error_code& err, size_t bytes)
     return found ? 0 : 1;
 }
 
+std::string make_log_line(const std::string& log_message)
+{
+    return (make_daytime_string() + " " + log_message + "\n");
+}
+
 void write_log(const std::string& outfile, const std::string& log_message)
 {
     if (!outfile.empty())
     {
         std::ofstream fout(outfile, std::ios::app);
-        fout << make_daytime_string() << " " << log_message << "\n";
+        fout << make_log_line(log_message);
     }
     else
     {
-        std::cout << make_daytime_string() << " " << log_message << "\n";
+        std::cout << make_log_line(log_message);
     }
 }
 
