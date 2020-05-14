@@ -95,7 +95,7 @@ void send_index(tcp::socket& socket, DIR *dir, const std::string& path)
         </body> \
         </html>";
 
-    std::string index =  "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
+    const std::string index =  "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
 
     send_string(socket, index);
 }
