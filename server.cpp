@@ -136,24 +136,23 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
     {
         send_string(socket, "HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
+        return;
+    }
+
+    const std::string path = work_dir.empty() ? "." : work_dir;
+
+    if (request.path() == "/")
+    {
+        DIR *dir = opendir(path.c_str());
+        if (dir == NULL)
+            send_string(socket, "HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
+        else
+            send_index(socket, dir, path);
+        closedir(dir);
     }
     else
     {
-        const std::string path = work_dir.empty() ? "." : work_dir;
-
-        if (request.path() == "/")
-        {
-            DIR *dir = opendir(path.c_str());
-            if (dir == NULL)
-                send_string(socket, "HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
-            else
-                send_index(socket, dir, path);
-            closedir(dir);
-        }
-        else
-        {
-            write_file(socket, request.path(), path);
-        }
+        write_file(socket, request.path(), path);
     }
 }
 
