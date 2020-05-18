@@ -115,13 +115,20 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
     }
     else
     {
-        send_string(socket, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
+        try
+        {
+            send_string(socket, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
 
-        char buff[1024] = {0};
-        size_t len;
+            char buff[1024] = {0};
+            size_t len;
 
-        while ((len = read(fd, buff, 1024)) > 0)
-            boost::asio::write(socket, boost::asio::buffer(buff, len));
+            while ((len = read(fd, buff, 1024)) > 0)
+                boost::asio::write(socket, boost::asio::buffer(buff, len));
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Exception: " << e.what() << "\n";
+        }
     }
     close(fd);
 }
