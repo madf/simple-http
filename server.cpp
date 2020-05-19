@@ -112,25 +112,23 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
             send_string(socket, "HTTP/1.1 403 File access not allowed\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
         else
             send_string(socket, "HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
+        return;
     }
-    else
+    try
     {
-        try
-        {
-            send_string(socket, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
+        send_string(socket, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
 
-            char buff[1024] = {0};
-            size_t len;
+        char buff[1024] = {0};
+        size_t len;
 
-            while ((len = read(fd, buff, 1024)) > 0)
-                boost::asio::write(socket, boost::asio::buffer(buff, len));
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << "Exception: " << e.what() << "\n";
-        }
-        close(fd);
+        while ((len = read(fd, buff, 1024)) > 0)
+            boost::asio::write(socket, boost::asio::buffer(buff, len));
     }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Exception: " << e.what() << "\n";
+    }
+    close(fd);
 }
 
 void write_response(tcp::socket& socket, const Request& request, const std::string& work_dir)
