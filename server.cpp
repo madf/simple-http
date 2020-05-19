@@ -166,8 +166,8 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
             {
                 std::cerr << "Exception: " << e.what() << "\n";
             }
+            closedir(dir);
         }
-        closedir(dir);
     }
     else
     {
