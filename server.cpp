@@ -129,8 +129,8 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
         {
             std::cerr << "Exception: " << e.what() << "\n";
         }
+        close(fd);
     }
-    close(fd);
 }
 
 void write_response(tcp::socket& socket, const Request& request, const std::string& work_dir)
