@@ -162,9 +162,9 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
             }
             catch (const std::exception& e)
             {
-                std::cerr << "Exception: " << e.what() << "\n";
+                closedir(dir);
+                throw e;
             }
-            closedir(dir);
         }
     }
     else
