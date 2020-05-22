@@ -273,13 +273,13 @@ int main(int argc, char* argv[])
             }
             catch (const std::exception& e)
             {
-                std::cerr << "Exception: " << e.what() << "\n";
+                write_log(outfile, socket.remote_endpoint().address().to_string() + " Exception: " + std::string(e.what()));
             }
         }
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Exception: " << e.what() << "\n";
+        write_log(outfile, "Exception: " + std::string(e.what()));
     }
     return 0;
 }
