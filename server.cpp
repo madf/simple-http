@@ -129,6 +129,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
         close(fd);
         throw e;
     }
+    close(fd);
 }
 
 void write_response(tcp::socket& socket, const Request& request, const std::string& work_dir)
