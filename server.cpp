@@ -153,18 +153,18 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
         if (dir == NULL)
         {
             send_string(socket, "HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
+            return;
         }
-        else
+        try
         {
-            try
-            {
-                send_index(socket, dir, path);
-            }
-            catch (const std::exception& e)
-            {
-                closedir(dir);
-                throw e;
-            }
+            send_index(socket, dir, path);
+            closedir(dir);
+            return;
+        }
+        catch (const std::exception& e)
+        {
+            closedir(dir);
+            throw e;
         }
     }
     else
