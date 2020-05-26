@@ -148,29 +148,28 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
 
     const std::string path = work_dir.empty() ? "." : work_dir;
 
-    if (request.path() == "/")
-    {
-        DIR *dir = opendir(path.c_str());
-        if (dir == NULL)
-        {
-            send_string(socket, "HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
-            return;
-        }
-        try
-        {
-            send_index(socket, dir, path);
-            closedir(dir);
-            return;
-        }
-        catch (const std::exception& e)
-        {
-            closedir(dir);
-            throw e;
-        }
-    }
-    else
+    if (request.path() != "/")
     {
         write_file(socket, request.path(), path);
+        return;
+    }
+
+    DIR *dir = opendir(path.c_str());
+    if (dir == NULL)
+    {
+        send_string(socket, "HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
+        return;
+    }
+    try
+    {
+        send_index(socket, dir, path);
+        closedir(dir);
+        return;
+    }
+    catch (const std::exception& e)
+    {
+        closedir(dir);
+        throw e;
     }
 }
 
