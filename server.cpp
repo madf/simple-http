@@ -100,7 +100,7 @@ void send_index(tcp::socket& socket, DIR *dir, const std::string& path)
     send_string(socket, index);
 }
 
-void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path)
+void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, const std::string response)
 {
     int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
 
@@ -116,7 +116,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
     }
     try
     {
-        send_string(socket, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
+        send_string(socket, response);
 
         char buff[1024] = {0};
         size_t len;
@@ -150,7 +150,15 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
 
     if (request.path() != "/")
     {
-        write_file(socket, request.path(), path);
+        const std::string ext = request.path().substr(request.path().find(".") + 1);
+
+        if (ext == "html" || ext == "htm")
+        {
+            write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n");
+            return;
+        }
+
+        write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
         return;
     }
 
