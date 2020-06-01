@@ -269,9 +269,18 @@ int main(int argc, char* argv[])
             acceptor.accept(socket);
             try
             {
-                const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
+                std::string msg;
 
-                const std::string msg(buff, bytes);
+                while (1)
+                {
+                    const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
+
+                    const std::string buff_str(buff, bytes);
+                    msg += buff_str;
+
+                    if (bytes < 1024)
+                        break;
+                }
                 const size_t str_end_pos = msg.find('\r');
                 const std::string start_str = msg.substr(0, str_end_pos);
 
