@@ -152,7 +152,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
     {
         const std::string ext = request.path().substr(request.path().find(".") + 1);
 
-        if (ext == "html" || ext == "htm")
+        if (ext == "html" || ext == "htm" || ext == "HTML" || ext == "HTM")
         {
             write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n");
             return;
