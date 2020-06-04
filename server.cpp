@@ -12,6 +12,7 @@
 #include <sys/types.h> //open
 #include <fcntl.h> //open
 #include <unistd.h> //read
+#include <ctype.h> //tolower
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
@@ -150,9 +151,12 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
 
     if (request.path() != "/")
     {
-        const std::string ext = request.path().substr(request.path().find(".") + 1);
+        std::string ext = request.path().substr(request.path().find(".") + 1);
 
-        if (ext == "html" || ext == "htm" || ext == "HTML" || ext == "HTM")
+        for (size_t i = 0; i < ext.length(); i++)
+            ext[i] = tolower(ext[i]);
+
+        if (ext == "html" || ext == "htm")
         {
             write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n");
             return;
