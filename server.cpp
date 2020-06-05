@@ -101,7 +101,7 @@ void send_index(tcp::socket& socket, DIR *dir, const std::string& path)
     send_string(socket, index);
 }
 
-void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, const std::string response)
+void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, const std::string& response)
 {
     int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
 
