@@ -3,3 +3,6 @@ server
 *.o
 *.d
 *.txt
+*.html
+*.htm
+server_files

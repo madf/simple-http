@@ -6,6 +6,13 @@
 #include <functional> // std::bind
 #include <algorithm> // std::search
 #include <ctime>
+#include <cerrno>
+#include <dirent.h> //struct dirent, opendir, readdir, closedir
+#include <sys/stat.h> //stat, struct stat, open
+#include <sys/types.h> //open
+#include <fcntl.h> //open
+#include <unistd.h> //read
+#include <ctype.h> //tolower
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
@@ -13,10 +20,9 @@ using boost::system::error_code;
 void reference()
 {
     std::cout << "Usage:\n";
-    std::cout << "server [-a/--address <bind-address][-h/--help][-v/--version]\n\n";
-/*    std::cout << "server [-a/--address <bind-address>][-d/--dir <work-dir>][-o/--out-log <log-file-name>][-h/--help][-v/--version]\n\n";
+    std::cout << "server [-a/--address <bind-address>][-d/--dir <work-dir>][-o/--out-log <log-file-name>][-h/--help][-v/--version]\n\n";
 
-    std::cout << "-d, --dir <work-dir> - specifies the working directory with files for the server;\n";*/
+    std::cout << "-d, --dir <work-dir> - specifies the working directory with files for the server;\n";
     std::cout << "-o, --out-log <log-file-name> - specifies the file name for logging for the server;\n";
     std::cout << "-a, --address <bind-address> - can be specified in <address>[:<port>] form, where <address> can be IP-address or domain name, <port> - number;\n";
     std::cout << "-v, --version - server version;\n";
@@ -40,38 +46,142 @@ size_t read_complete(const char* buff, const error_code& err, size_t bytes)
     return found ? 0 : 1;
 }
 
-void write_log(const std::string& outfile, const std::string& log_message)
+std::string make_log_line(const std::string& message)
 {
-    if (!outfile.empty())
-    {
-        std::ofstream fout(outfile, std::ios::app);
-        fout << log_message << "\n";
-    }
-    else
-    {
-        std::cout << log_message << "\n";
-    }
+    return make_daytime_string() + " " + message + "\n";
 }
 
-void write_response(tcp::socket& socket, const Request& request, const std::string& date)
+void write_log(const std::string& outfile, const std::string& message)
 {
-    std::string error_message;
-
-    if (request.verb() != "GET")
-        error_message = "HTTP/1.1 405 Method not allowed\r\n";
-    if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-        error_message += "HTTP/1.1 505 HTTP Version Not Supported\r\n";
-
-    error_code ignored_error;
-
-    if (!error_message.empty())
-    {
-        boost::asio::write(socket, boost::asio::buffer(error_message), ignored_error);
-    }
+    if (!outfile.empty())
+        std::ofstream(outfile, std::ios::app) << make_log_line(message);
     else
+        std::cout << make_log_line(message);
+}
+
+void send_string(tcp::socket& socket, const std::string& str)
+{
+    boost::asio::write(socket, boost::asio::buffer(str));
+}
+
+void send_index(tcp::socket& socket, DIR *dir, const std::string& path)
+{
+    std::string lines;
+
+    for (struct dirent *entry = readdir(dir); entry != NULL; entry = readdir(dir))
     {
-        const std::string message = "HTTP/1.1 200 OK\r\nHost: localhost\r\n\r\n" + date;
-        boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+        if (strcmp(".", entry->d_name) && strcmp("..", entry->d_name))
+        {
+            const std::string file_name = entry->d_name;
+
+            struct stat st;
+            if (stat((path + "/" + file_name).c_str(), &st) < 0)
+            {
+                lines = lines + "<tr><td>" + file_name + "</td><td>?</td><td>?</td></tr>";
+            }
+            else
+            {
+                const std::string file_date = ctime(&st.st_ctime);
+                lines = lines + "<tr><td><p><a href=\"" + file_name + "\">" + file_name + "</a></p></td><td>" + std::to_string(st.st_size) + "</td><td>" + file_date + "</td></tr>";
+            }
+        }
+    }
+
+    const std::string table_html ="<!DOCTYPE html> \
+        <html> \
+        <body> \
+        <table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"> \
+        <tr><td>File name</td><td>File size</td><td>Last modification date</td></tr>" + lines + " \
+        </table> \
+        </body> \
+        </html>";
+
+    const std::string index =  "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
+
+    send_string(socket, index);
+}
+
+void write_file(tcp::socket& socket, const std::string& request_path_file, const std::string& path, const std::string& response)
+{
+    int fd = open((path + "/" + request_path_file).c_str(), O_RDONLY);
+
+    if (fd == -1)
+    {
+        if (errno == ENOENT)
+            send_string(socket, "HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
+        else if (errno == EACCES)
+            send_string(socket, "HTTP/1.1 403 File access not allowed\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
+        else
+            send_string(socket, "HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
+        return;
+    }
+    try
+    {
+        send_string(socket, response);
+
+        char buff[1024] = {0};
+        size_t len;
+
+        while ((len = read(fd, buff, 1024)) > 0)
+            boost::asio::write(socket, boost::asio::buffer(buff, len));
+    }
+    catch (const std::exception& e)
+    {
+        close(fd);
+        throw;
+    }
+    close(fd);
+}
+
+void write_response(tcp::socket& socket, const Request& request, const std::string& work_dir)
+{
+    if (request.verb() != "GET")
+    {
+        send_string(socket, "HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
+        return;
+    }
+
+    if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
+    {
+        send_string(socket, "HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
+        return;
+    }
+
+    const std::string path = work_dir.empty() ? "." : work_dir;
+
+    if (request.path() != "/")
+    {
+        std::string ext = request.path().substr(request.path().find(".") + 1);
+
+        for (size_t i = 0; i < ext.length(); i++)
+            ext[i] = tolower(ext[i]);
+
+        if (ext == "html" || ext == "htm")
+        {
+            write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n");
+            return;
+        }
+
+        write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
+        return;
+    }
+
+    DIR *dir = opendir(path.c_str());
+    if (dir == NULL)
+    {
+        send_string(socket, "HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
+        return;
+    }
+    try
+    {
+        send_index(socket, dir, path);
+        closedir(dir);
+        return;
+    }
+    catch (const std::exception& e)
+    {
+        closedir(dir);
+        throw;
     }
 }
 
@@ -80,6 +190,7 @@ int main(int argc, char* argv[])
     const std::string version = "1.2.0";
     std::string address;
     std::string outfile;
+    std::string work_dir;
 
     for (int i = 1; i < argc; ++i)
     {
@@ -93,6 +204,15 @@ int main(int argc, char* argv[])
                 return 1;
             }
             address = argv[++i];
+        }
+        else if (arg == "-d" || arg == "--dir")
+        {
+            if (i + 1 == argc)
+            {
+                std::cerr << arg << " needs an argument - a filename.\n";
+                return 1;
+            }
+            work_dir = argv[++i];
         }
         else if (arg == "-o" || arg == "--outfile")
         {
@@ -151,23 +271,36 @@ int main(int argc, char* argv[])
         {
             tcp::socket socket(io_service);
             acceptor.accept(socket);
+            try
+            {
+                std::string msg;
 
-            const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
+                while (1)
+                {
+                    const size_t bytes = read(socket, boost::asio::buffer(buff), std::bind(read_complete, buff, pls::_1, pls::_2));
 
-            const std::string msg(buff, bytes);
-            const size_t str_end_pos = msg.find('\r');
-            const std::string start_str = msg.substr(0, str_end_pos);
+                    const std::string buff_str(buff, bytes);
+                    msg += buff_str;
 
-            const std::string date = make_daytime_string();
+                    if (bytes < 1024)
+                        break;
+                }
+                const size_t str_end_pos = msg.find('\r');
+                const std::string start_str = msg.substr(0, str_end_pos);
 
-            write_response(socket, Request(start_str), date);
+                write_response(socket, Request(start_str), work_dir);
 
-            write_log(outfile, date + " " + socket.remote_endpoint().address().to_string() + " " + start_str);
+                write_log(outfile, socket.remote_endpoint().address().to_string() + " " + start_str);
+            }
+            catch (const std::exception& e)
+            {
+                write_log(outfile, socket.remote_endpoint().address().to_string() + " Exception: " + std::string(e.what()));
+            }
         }
     }
     catch (const std::exception& e)
     {
-        std::cerr << e.what() << "\n";
+        write_log(outfile, "Exception: " + std::string(e.what()));
     }
     return 0;
 }
