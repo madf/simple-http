@@ -38,6 +38,19 @@ std::string make_daytime_string()
     return buffer;
 }
 
+std::string int_to_hex(int dec)
+{
+    std::string digits[16] = {"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"};
+    std::string hex;
+    do
+    {
+        hex.insert (0, digits[dec % 16]);
+        dec /= 16;
+    }
+    while (dec != 0);
+    return "0x" + hex;
+}
+
 size_t read_complete(const char* buff, const error_code& err, size_t bytes)
 {
     if (err) return 0;
@@ -123,7 +136,14 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
         size_t len;
 
         while ((len = read(fd, buff, 1024)) > 0)
+        {
+            boost::asio::write(socket, boost::asio::buffer(int_to_hex(len)));
+            boost::asio::write(socket, boost::asio::buffer("\r\n"));
             boost::asio::write(socket, boost::asio::buffer(buff, len));
+            boost::asio::write(socket, boost::asio::buffer("\r\n"));
+        }
+        boost::asio::write(socket, boost::asio::buffer(int_to_hex(0)));
+        boost::asio::write(socket, boost::asio::buffer("\r\n\r\n"));
     }
     catch (const std::exception& e)
     {
@@ -158,11 +178,11 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
 
         if (ext == "html" || ext == "htm")
         {
-            write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n");
+            write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nTransfer-Encoding: chunked\r\n\r\n");
             return;
         }
 
-        write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
+        write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\nTransfer-Encoding: chunked\r\n\r\n");
         return;
     }
 
@@ -289,7 +309,6 @@ int main(int argc, char* argv[])
                 const std::string start_str = msg.substr(0, str_end_pos);
 
                 write_response(socket, Request(start_str), work_dir);
-
                 write_log(outfile, socket.remote_endpoint().address().to_string() + " " + start_str);
             }
             catch (const std::exception& e)
