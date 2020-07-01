@@ -48,7 +48,7 @@ std::string int_to_hex(int dec)
         dec /= 16;
     }
     while (dec != 0);
-    return "0x" + hex;
+    return hex;
 }
 
 size_t read_complete(const char* buff, const error_code& err, size_t bytes)
@@ -138,12 +138,12 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
         while ((len = read(fd, buff, 1024)) > 0)
         {
             boost::asio::write(socket, boost::asio::buffer(int_to_hex(len)));
-            boost::asio::write(socket, boost::asio::buffer("\r\n"));
+            send_string(socket, "\r\n");
             boost::asio::write(socket, boost::asio::buffer(buff, len));
-            boost::asio::write(socket, boost::asio::buffer("\r\n"));
+            send_string(socket, "\r\n");
         }
         boost::asio::write(socket, boost::asio::buffer(int_to_hex(0)));
-        boost::asio::write(socket, boost::asio::buffer("\r\n\r\n"));
+        send_string(socket, "\r\n\r\n");
     }
     catch (const std::exception& e)
     {
