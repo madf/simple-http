@@ -142,7 +142,7 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
             boost::asio::write(socket, boost::asio::buffer(buff, len));
             send_string(socket, "\r\n");
         }
-        boost::asio::write(socket, boost::asio::buffer(int_to_hex(0)));
+        boost::asio::write(socket, boost::asio::buffer("0"));
         send_string(socket, "\r\n\r\n");
     }
     catch (const std::exception& e)
