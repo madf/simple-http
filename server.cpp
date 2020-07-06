@@ -40,11 +40,11 @@ std::string make_daytime_string()
 
 std::string int_to_hex(int dec)
 {
-    const std::string digits[16] = {"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"};
+    const std::string digits = "0123456789ABCDEF";
     std::string hex;
     for (;;)
     {
-        hex.insert(0, digits[dec % 16]);
+        hex.insert(0, 1, digits[dec % 16]);
         dec /= 16;
         if (dec == 0)
             break;
