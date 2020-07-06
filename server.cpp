@@ -38,6 +38,20 @@ std::string make_daytime_string()
     return buffer;
 }
 
+std::string int_to_hex(int dec)
+{
+    const std::string digits = "0123456789ABCDEF";
+    std::string hex;
+    for (;;)
+    {
+        hex.insert(0, 1, digits[dec % 16]);
+        dec /= 16;
+        if (dec == 0)
+            break;
+    }
+    return hex;
+}
+
 size_t read_complete(const char* buff, const error_code& err, size_t bytes)
 {
     if (err) return 0;
@@ -123,7 +137,14 @@ void write_file(tcp::socket& socket, const std::string& request_path_file, const
         size_t len;
 
         while ((len = read(fd, buff, 1024)) > 0)
+        {
+            boost::asio::write(socket, boost::asio::buffer(int_to_hex(len)));
+            send_string(socket, "\r\n");
             boost::asio::write(socket, boost::asio::buffer(buff, len));
+            send_string(socket, "\r\n");
+        }
+        boost::asio::write(socket, boost::asio::buffer("0"));
+        send_string(socket, "\r\n\r\n");
     }
     catch (const std::exception& e)
     {
@@ -158,11 +179,11 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
 
         if (ext == "html" || ext == "htm")
         {
-            write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n");
+            write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nTransfer-Encoding: chunked\r\n\r\n");
             return;
         }
 
-        write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n");
+        write_file(socket, request.path(), path, "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\nTransfer-Encoding: chunked\r\n\r\n");
         return;
     }
 
@@ -187,7 +208,7 @@ void write_response(tcp::socket& socket, const Request& request, const std::stri
 
 int main(int argc, char* argv[])
 {
-    const std::string version = "1.2.0";
+    const std::string version = "1.3.0";
     std::string address;
     std::string outfile;
     std::string work_dir;
@@ -289,7 +310,6 @@ int main(int argc, char* argv[])
                 const std::string start_str = msg.substr(0, str_end_pos);
 
                 write_response(socket, Request(start_str), work_dir);
-
                 write_log(outfile, socket.remote_endpoint().address().to_string() + " " + start_str);
             }
             catch (const std::exception& e)
